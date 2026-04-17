@@ -230,9 +230,13 @@ public class CallAudioRouteController implements CallAudioRouteAdapter {
             @Override
             public void onCommunicationDeviceChanged(AudioDeviceInfo device) {
                 @AudioRoute.AudioRouteType int audioType = device != null
-                        ? DEVICE_INFO_TYPE_TO_AUDIO_ROUTE_TYPE.get(device.getType())
+                        ? DEVICE_INFO_TYPE_TO_AUDIO_ROUTE_TYPE.getOrDefault(device.getType(), TYPE_INVALID)
                         : TYPE_INVALID;
                 Log.i(this, "onCommunicationDeviceChanged: %d", audioType);
+                if (audioType == TYPE_INVALID) {
+                    Log.w(this, "Ignoring unsupported communication device: %s", device);
+                    return;
+                }
                 if (device != null && device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
                     if (mCurrentRoute.getType() != TYPE_SPEAKER) {
                         sendMessageWithSessionInfo(SPEAKER_ON);
